@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
@@ -23,7 +24,6 @@ public class CustomerService {
         return customerRepo.save(customer);
     }
 
-
     public Customer getCustomerById(Long id) {
         logger.info("Fetching customer with id: {}", id);
         Optional<Customer> customer = customerRepo.findById(id);
@@ -32,6 +32,19 @@ public class CustomerService {
 
     public boolean customerExists(Long id) {
         logger.info("Checking if customer exists with id: {}", id);
-        return customerRepo.existsById(id);
+        return customerRepo.findById(id).isPresent();
+    }
+
+    public List<Customer> getCustomersByCriteria(String criteria) {
+        logger.info("Fetching customers with criteria: {}", criteria);
+        List<Customer> customers = customerRepo.findByCriteria(criteria);
+        return customers.stream()
+                .filter(customer -> customer.getName().contains(criteria) || customer.getEmail().contains(criteria))
+                .collect(Collectors.toList());
+    }
+
+    public List<Customer> getCustomersWithHighSpending(Double amount) {
+        logger.info("Fetching customers with spending over: {}", amount);
+        return customerRepo.findCustomersWithSpendingOver(amount);
     }
 }
